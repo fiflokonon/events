@@ -48,7 +48,8 @@
 </head>
 <body>
 
-<h1>Génerez des tickets !</h1>
+<h1 style="text-align: center">Création des tickets !</h1>
+<p style="text-align: center">Entrez les informations relatives au lot de tickets que vous voulez générer.</p>
 
 <form action="{{ route('process_tickets') }}" method="post">
     @csrf
