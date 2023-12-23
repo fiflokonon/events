@@ -48,6 +48,7 @@
 </head>
 <body>
 
+<h1>Génerez des tickets !</h1>
 
 <form action="{{ route('process_tickets') }}" method="post">
     @csrf
@@ -57,13 +58,13 @@
     @endif
 
     <label for="title">Titre du Ticket:</label>
-    <input type="text" id="title" name="title" required>
+    <input type="text" id="title" name="title" placeholder="Entrez un titre" required>
     @error('title')
     <div style="color: red; margin-bottom: 10px;">{{ $message }}</div>
     @enderror
 
     <label for="quantity">Nombre de Tickets:</label>
-    <input type="number" id="quantity" name="quantity" min="1" required>
+    <input type="number" id="quantity" name="quantity" min="1" placeholder="Entrez le nombre de tickets" required>
     @error('quantity')
     <div style="color: red; margin-bottom: 10px;">{{ $message }}</div>
     @enderror
