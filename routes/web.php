@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('pages.add_tickets');
+    return view('pages.new_ticket');
 })->name('add_tickets');
 
-Route::post('/tickets', [TicketController::class, 'processTickets'])->name('process_tickets');
-Route::get('/tickets-lot', [TicketController::class, 'lot_tickets'])->name('lot_tickets');
-Route::get('/download-tickets/{title}', [TicketController::class, 'downloadTickets'])->name('download_tickets');
+Route::get('/list-tickets', [TicketController::class, 'listTickets'])->name('list_tickets');
+Route::get('/download-ticket/{ticket}', [TicketController::class, 'downloadTicket'])->name('download_ticket');
+Route::post('/store-ticket', [TicketController::class, 'storeTicket'])->name('create_ticket');

@@ -11,12 +11,14 @@ class Ticket extends Model
 
     protected $table = 'tickets';
     protected $fillable = [
-      'title',
-      'type',
+      'name',
+      'type_table',
+      'contact',
       'key',
       'link',
       'payment_details',
       'scanned',
+      'downloaded',
       'status'
     ];
 }

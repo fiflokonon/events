@@ -1,34 +1,56 @@
+<!-- resources/views/list_tickets.blade.php -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste des Lots de Tickets</title>
+    <title>Liste des Tickets</title>
     <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
         table {
-            border-collapse: collapse;
             width: 100%;
-            margin-top: 20px;
+            border-collapse: collapse;
+            margin-bottom: 20px;
         }
 
         th, td {
+            padding: 12px;
             border: 1px solid #ddd;
-            padding: 8px;
             text-align: left;
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #4caf50;
+            color: #fff;
         }
 
         .download-btn {
-            padding: 8px;
-            background-color: #4caf50;
-            color: #fff;
-            text-decoration: none;
-            display: inline-block;
+            padding: 8px 16px;
+            border: none;
             border-radius: 4px;
+            cursor: pointer;
+            color: #fff;
         }
+
+        a{
+            text-decoration: none;
+        }
+
+        .download-btn.green {
+            background-color: #4caf50;
+        }
+
+        .download-btn.red {
+            background-color: #e74c3c;
+        }
+
         .add-btn {
             padding: 8px;
             background-color: darkblue;
@@ -36,17 +58,13 @@
             text-decoration: none;
             display: inline-block;
             border-radius: 4px;
-        }
-
-
-        .download-btn:hover {
-            background-color: #45a049;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-<h2>Liste des Lots de Tickets</h2>
+<h2 style="text-align: center; margin-top: 10px">Liste des Tickets</h2>
 @if(session('success'))
     <div style="color: green; margin-bottom: 10px;">{{ session('success') }}</div>
 @endif
@@ -54,18 +72,23 @@
 <table>
     <thead>
     <tr>
-        <th>Titre</th>
-        <th>Nombre</th>
+        <th>Nom</th>
+        <th>Contact</th>
+        <th>Type de Table</th>
         <th>Action</th>
     </tr>
     </thead>
     <tbody>
-    @foreach($lots as $lot)
+    @foreach($tickets as $ticket)
         <tr>
-            <td>{{ $lot->title }}</td>
-            <td>{{ $lot->ticket_count }}</td>
+            <td>{{ $ticket->name }}</td>
+            <td>{{ $ticket->contact }}</td>
+            <td>{{ $ticket->type_table }}</td>
             <td>
-                <a href="{{ route('download_tickets', ['title' => $lot->title]) }}" class="download-btn">Télécharger</a>
+                <a href="{{ route('download_ticket', ['ticket' => $ticket->id]) }}"
+                   class="download-btn {{ $ticket->downloaded ? 'red' : 'green' }}">
+                    Télécharger
+                </a>
             </td>
         </tr>
     @endforeach

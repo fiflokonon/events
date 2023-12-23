@@ -42,7 +42,55 @@ class TicketController extends Controller
         return redirect()->route('lot_tickets')->with('success', 'Les tickets ont été créés avec succès.');
     }
 
-    private function generateQRCodeLink($ticket, $title, $number)
+    private function generateQRCodeLink($ticket)
+    {
+        $key = $this->aesEncrypt($ticket->id);
+        // Génération du lien QR avec simple-qrcode
+        $qrCode = QrCode::format('png')->size(400)->generate($key);
+        // Sauvegarde l'image dans un fichier
+        $filePath = "tickets/0100-$ticket->id-$ticket->name.png";
+        Storage::put($filePath, $qrCode);
+        $ticket->key = $key;
+        $ticket->link = $filePath;
+        $ticket->save();
+    }
+
+    public function storeTicket(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'contact' => 'required|string|max:255',
+            'type_table' => 'required|string',
+        ]);
+
+        $ticket = new Ticket();
+        $ticket->name = $validatedData['name'];
+        $ticket->contact = $validatedData['contact'];
+        $ticket->type_table = $validatedData['type_table'];
+        $ticket->save();
+        $this->generateQRCodeLink($ticket);
+        return redirect()->route('list_tickets');
+    }
+
+    public function listTickets()
+    {
+        $tickets = Ticket::all();
+        return view('pages.list_tickets', compact('tickets'));
+    }
+
+    public function downloadTicket($ticketId)
+    {
+        $ticket = Ticket::find($ticketId);
+        if (!$ticket) {
+            abort(404);
+        }
+        $filePath = $ticket->link;
+        $ticket->update(['downloaded' => true]);
+        return response()->download(storage_path("app/{$filePath}"));
+    }
+
+
+    /*private function generateQRCodeLink($ticket, $title, $number)
     {
         $key = $this->aesEncrypt($ticket->id);
         // Génération du lien QR avec simple-qrcode
@@ -63,56 +111,18 @@ class TicketController extends Controller
         $ticket->link = $filePath;
         $ticket->save();
         #return $filePath;
-    }
-
-    public function lot_tickets()
-    {
-        $titlesWithCount = Ticket::select('title', DB::raw('count(*) as ticket_count'))
-            ->where('type', 'lot')
-            ->groupBy('title')
-            ->get();
-
-        return view('pages.list_tickets', [
-            'lots' => $titlesWithCount
-        ]);
-    }
-
-    public function downloadTickets($title)
-    {
-        $zipFileName = "{$title}_tickets.zip";
-        $zipFilePath = storage_path("app/tickets/{$title}/{$zipFileName}");
-        // Créez une instance de ZipArchive
-        $zip = new ZipArchive();
-        if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-            // Ajoutez les fichiers du dossier au zip
-            $files = Storage::allFiles("tickets/{$title}");
-            foreach ($files as $file) {
-                $relativePath = 'tickets/' . $title . '/' . basename($file);
-                $zip->addFile(storage_path("app/{$relativePath}"), $relativePath);
-            }
-            // Fermez l'archive
-            $zip->close();
-        }
-        // Retournez la réponse pour le téléchargement
-        return response()->download($zipFilePath, $zipFileName)->deleteFileAfterSend(true);
-    }
+    }*/
 
     public function getTicketInfo(Request $request)
     {
         $ticketId = $this->aesDecrypt($request->key);
-        #dd($ticketId);
         if ($ticketId === null) {
            return response()->json(["success" => false, 'message' => 'Ticket non reconnu']);
         }
-
-        // Récupère les informations du ticket
         $ticket = Ticket::find($ticketId);
-
         if (!$ticket) {
-            // Ticket non trouvé
-            abort(404); // Ou renvoyer une réponse appropriée
+            response()->json(['success' => true, 'message' => 'Ticket non trouvé']);
         }
-        // Retourne les informations du ticket
         return response()->json(['success' => true, 'response' => $ticket]);
     }
 
