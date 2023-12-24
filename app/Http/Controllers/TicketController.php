@@ -14,40 +14,15 @@ use ZipArchive;
 
 class TicketController extends Controller
 {
-    public function processTickets(Request $request)
-    {
-        // Validation des données du formulaire
-        $request->validate([
-            'title' => 'required|unique:tickets|max:255',
-            'quantity' => 'required|integer|min:1',
-        ]);
-        $title = $request->input('title');
-        $quantity = $request->input('quantity');
-        // Créez le dossier s'il n'existe pas encore
-        $folderPath = storage_path("app/tickets/{$title}");
-        if (!file_exists($folderPath)) {
-            mkdir($folderPath, 0755, true);
-        }
-        // Créez les tickets en fonction du nombre spécifié
-        for ($i = 0; $i < $quantity; $i++) {
-            $ticket = Ticket::create([
-                'title' => $title,
-                'type' => 'lot',
-                'payment_details' => null,
-                'scanned' => false,
-                'status' => true,
-            ]);
-            $this->generateQRCodeLink($ticket, $title, $i);
-        }
-        return redirect()->route('lot_tickets')->with('success', 'Les tickets ont été créés avec succès.');
-    }
 
     private function generateQRCodeLink($ticket)
     {
         $key = $this->aesEncrypt($ticket->id);
-        // Génération du lien QR avec simple-qrcode
-        $qrCode = QrCode::format('png')->size(400)->generate($key);
-        // Sauvegarde l'image dans un fichier
+        // Génère le texte à afficher lors du scan (peut être personnalisé)
+        $displayText = "Votre texte personnalisé ici pour le ticket {$ticket->id}";
+        // Formatte le combinedData comme '[key]-$displayText'
+        $combinedData = "[{$key}]$-{$displayText}";
+        $qrCode = QrCode::format('png')->size(400)->generate($combinedData);
         $filePath = "tickets/0100-$ticket->id-$ticket->name.png";
         Storage::put($filePath, $qrCode);
         $ticket->key = $key;
@@ -74,7 +49,7 @@ class TicketController extends Controller
 
     public function listTickets()
     {
-        $tickets = Ticket::all();
+        $tickets = Ticket::orderBy('id', 'desc')->get();
         return view('pages.list_tickets', compact('tickets'));
     }
 
