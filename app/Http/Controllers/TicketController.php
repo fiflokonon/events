@@ -18,11 +18,9 @@ class TicketController extends Controller
     private function generateQRCodeLink($ticket)
     {
         $key = $this->aesEncrypt($ticket->id);
-        // Génère le texte à afficher lors du scan (peut être personnalisé)
-        $displayText = "Votre texte personnalisé ici pour le ticket {$ticket->id}";
-        // Formatte le combinedData comme '[key]-$displayText'
-        $combinedData = "[{$key}]$-{$displayText}";
-        $qrCode = QrCode::format('png')->size(400)->generate($combinedData);
+        /*$displayText = "Votre texte personnalisé ici pour le ticket {$ticket->id}";
+        $combinedData = "[{$key}]$-{$displayText}";*/
+        $qrCode = QrCode::format('png')->size(400)->generate($key);
         $filePath = "tickets/0100-$ticket->id-$ticket->name.png";
         Storage::put($filePath, $qrCode);
         $ticket->key = $key;
